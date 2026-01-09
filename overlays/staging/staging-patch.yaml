@@ -5,3 +5,7 @@
 - op: replace
   path: /spec/rules/1/backendRefs/0/name
   value: stag-todo-app-service
+
+- op: replace
+  path: /spec/parentRefs/0/name
+  value: stag-project-gw
