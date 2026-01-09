@@ -58,7 +58,7 @@ spec:
                 name: db-configmap
           env:
             - name: NATS_SERVER_URL
-              value: nats://my-nats:4222
+              value: nats://my-nats.default.svc:4222
           ports:
             - name: backend-http
               containerPort: 4000
