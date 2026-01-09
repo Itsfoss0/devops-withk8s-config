@@ -7,3 +7,15 @@ resources:
 
 namePrefix: stag-
 namespace: staging
+
+replacements:
+  - source:
+      kind: Service
+      name: pg-service
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ConfigMap
+          name: db-configmap
+        fieldPaths:
+          - data.PG_HOST
