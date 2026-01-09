@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todoist-dep
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todo-app
+
+  template:
+    metadata:
+      labels:
+        app: todo-app
+
+    spec:
+      initContainers:
+        - name: init-db
+          image: postgres:16-alpine3.20
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              export PGPASSWORD="$PG_PASSWORD"
+              echo "Waiting for Postgres..."
+              until pg_isready -h "$PG_HOST" -p 5432 -U "$PG_USER"; do
+                sleep 2
+              done
+
+              echo "Running init.sql..."
+              psql \
+                -h "$PG_HOST" \
+                -U "$PG_USER" \
+                -d "$DB_NAME" \
+                -f /sql/init.sql
+          envFrom:
+            - configMapRef:
+                name: db-configmap
+          volumeMounts:
+            - name: db-init
+              mountPath: /sql
+
+      containers:
+        - name: frontend
+          image: PROJECT/FRONTEND
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: frontend-http
+              containerPort: 3000
+
+        - name: backend
+          image: PROJECT/BACKEND
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: db-configmap
+          env:
+            - name: NATS_SERVER_URL
+              value: nats://my-nats:4222
+          ports:
+            - name: backend-http
+              containerPort: 4000
+          livenessProbe:
+            httpGet:
+              path: /_/health
+              port: 4000
+            initialDelaySeconds: 90
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /_/status
+              port: 4000
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+      volumes:
+        - name: db-init
+          configMap:
+            name: db-configmap

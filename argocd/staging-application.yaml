@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: project-staging
+  namespace: argocd
+spec:
+  destination:
+    namespace: staging
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://github.com/Itsfoss0/devops-withk8s-config
+    targetRevision: main
+    path: overlays/staging
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

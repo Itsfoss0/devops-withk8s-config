@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-configmap
+
+data:
+  PG_HOST: pg-service
+  PG_PASSWORD: foss
+  DB_NAME: todos
+  PG_USER: itsfoss
+  init.sql: |
+    -- init the database
+    \c todos;
+
+    CREATE TABLE IF NOT EXISTS todos (
+      id SERIAL PRIMARY KEY,
+      createdat TIMESTAMP NOT NULL DEFAULT NOW(),
+      title VARCHAR(256) NOT NULL
+    );
