@@ -21,3 +21,8 @@ replacements:
 
 patches:
 - path: staging-patch.yaml
+  target:
+    group: gateway.networking.k8s.io
+    version: v1beta1
+    kind: HTTPRoute
+    name: project-http-rt
